@@ -291,6 +291,18 @@ class Organization(github.GithubObject.CompletableGithubObject):
             self.url + "/public_members/" + public_member._identity
         )
 
+    def convert_to_outside_collaborator(self, member):
+        """
+        :calls: `PUT /orgs/:org/outside_collaborators/:user <http://developer.github.com/v3/orgs/outside_collaborators>`_
+        :param member: :class:`github.NamedUser.NamedUser`
+        :rtype: None
+        """
+        assert isinstance(member, github.NamedUser.NamedUser), member
+        headers, data = self._requester.requestJsonAndCheck(
+            "PUT",
+            self.url + "/outside_collaborators/" + member._identity
+        )
+
     def create_fork(self, repo):
         """
         :calls: `POST /repos/:owner/:repo/forks <http://developer.github.com/v3/repos/forks>`_
@@ -524,6 +536,24 @@ class Organization(github.GithubObject.CompletableGithubObject):
             url_parameters
         )
 
+    def get_outside_collaborators(self, filter=github.GithubObject.NotSet):
+        """
+        :calls: `GET /org/:org/outside_collaborators <http://developer.github.com/v3/orgs/outside_collaborators>`_
+        :param filter: string
+        :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.NamedUser.NamedUser`
+        """
+        assert (filter is github.GithubObject.NotSet or
+                isinstance(filter, (str,unicode))), filter
+
+        url_parameters = {}
+        if filter is not github.GithubObject.NotSet:
+            url_parameters["filter"] = filter
+        return github.PaginatedList.PaginatedList(
+            github.NamedUser.NamedUser,
+            self._requester,
+            self.url + "/outside_collaborators"
+        )
+
     def get_public_members(self):
         """
         :calls: `GET /orgs/:org/public_members <http://developer.github.com/v3/orgs/members>`_
@@ -632,6 +662,18 @@ class Organization(github.GithubObject.CompletableGithubObject):
         headers, data = self._requester.requestJsonAndCheck(
             "DELETE",
             self.url + "/members/" + member._identity
+        )
+
+    def remove_from_outside_collaborators(self, outside_collaborator):
+        """
+        :calls: `DELETE /orgs/:org/outside_collaborators/:user <http://developer.github.com/v3/orgs/outside_collaborators>`_
+        :param public_member: :class:`github.NamedUser.NamedUser`
+        :rtype: None
+        """
+        assert isinstance(outside_collaborator, github.NamedUser.NamedUser), outside_collaborator
+        headers, data = self._requester.requestJsonAndCheck(
+            "DELETE",
+            self.url + "/outside_collaborators/" + outside_collabortator._identity
         )
 
     def remove_from_public_members(self, public_member):
